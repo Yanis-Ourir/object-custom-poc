@@ -1,26 +1,40 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { Storage } from "@plasmohq/storage"
+
 
 function IndexPopup() {
-  const [data, setData] = useState("")
+  const storage = new Storage();
+  const [objectColor, setObjectColor] = useState("");
+
+  useEffect(() => {
+    async function getColors() {
+
+      const storedObjectColor = await storage.get("objectColor");
+      setObjectColor(storedObjectColor);
+    }
+    getColors();
+  }, []);
+
+
+  function handleColorChange(event, setColor) {
+    const newColor = event.target.value;
+    setColor(newColor);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    storage.set("objectColor", objectColor);
+    chrome.tabs.reload();
+  }
+
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        padding: 16
-      }}>
-      <h2>
-        Welcome to your{" "}
-        <a href="https://www.plasmo.com" target="_blank">
-          Plasmo
-        </a>{" "}
-        Extension!
-      </h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-      <a href="https://docs.plasmo.com" target="_blank">
-        View Docs
-      </a>
+    <div>
+      <form>
+        <label>Choose your color object :</label>
+        <input type="color" onChange={(e) => handleColorChange(e, setObjectColor)} value={objectColor}></input>
+        <button type="submit" onClick={handleSubmit}>save</button>
+      </form>
     </div>
   )
 }
